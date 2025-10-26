@@ -66,9 +66,12 @@ const CountdownTimer = () => {
   }, [isRunning, time]);
 
   const playSound = () => {
-    if (audioRef.current && soundEnabled) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {});
+    try {
+      if (audioRef.current && soundEnabled) {
+        audioRef.current();
+      }
+    } catch (e) {
+      console.log('Audio playback failed:', e);
     }
   };
 
@@ -76,7 +79,7 @@ const CountdownTimer = () => {
     if (!soundEnabled) return;
     
     try {
-      const { audioContext } = completeAudioRef.current;
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
       
