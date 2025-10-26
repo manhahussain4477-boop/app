@@ -50,9 +50,12 @@ const Stopwatch = () => {
   }, [isRunning]);
 
   const playSound = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {});
+    try {
+      if (audioRef.current) {
+        audioRef.current();
+      }
+    } catch (e) {
+      console.log('Audio playback failed:', e);
     }
   };
 
