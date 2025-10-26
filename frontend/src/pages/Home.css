@@ -36,6 +36,12 @@
   gap: 48px;
 }
 
+.ad-section {
+  display: flex;
+  justify-content: center;
+  margin-top: -16px;
+}
+
 .tool-section {
   background: #ffffff;
   border: 1px solid #e5e5e5;
