@@ -71,6 +71,25 @@
   transition: all 0.3s ease;
 }
 
+.lap-btn {
+  border: 2px solid #e5e5e5;
+  background: #ffffff;
+  color: #666666;
+}
+
+.lap-btn:hover:not(:disabled) {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: #eff6ff;
+  transform: translateY(-2px);
+}
+
+.lap-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .start-btn {
   background: #2563eb;
   color: #ffffff;
