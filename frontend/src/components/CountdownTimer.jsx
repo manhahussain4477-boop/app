@@ -12,7 +12,6 @@ const CountdownTimer = () => {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const intervalRef = useRef(null);
   const audioRef = useRef(null);
-  const completeAudioRef = useRef(null);
 
   useEffect(() => {
     // Create click sound function
