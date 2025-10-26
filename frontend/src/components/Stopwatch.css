@@ -149,6 +149,28 @@
   align-items: center;
 }
 
+.sound-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.sound-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  padding: 8px 16px;
+  border: 2px solid #e5e5e5;
+  transition: all 0.3s ease;
+}
+
+.sound-btn:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: #eff6ff;
+}
+
 .input-label {
   font-size: 16px;
   color: #666666;
