@@ -1,12 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import { Play, Pause, RotateCcw, Flag } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import './Stopwatch.css';
 
 const Stopwatch = () => {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [laps, setLaps] = useState([]);
   const intervalRef = useRef(null);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    // Create audio element for click sound
+    audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSAKLVLS';
+  }, []);
 
   useEffect(() => {
     if (isRunning) {
@@ -26,17 +33,40 @@ const Stopwatch = () => {
     };
   }, [isRunning]);
 
+  const playSound = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+    }
+  };
+
   const handleStart = () => {
     setIsRunning(true);
+    playSound();
   };
 
   const handleStop = () => {
     setIsRunning(false);
+    playSound();
+  };
+
+  const handleLap = () => {
+    if (isRunning && time > 0) {
+      const lapTime = {
+        id: laps.length + 1,
+        time: time,
+        timestamp: Date.now()
+      };
+      setLaps([lapTime, ...laps]);
+      playSound();
+    }
   };
 
   const handleReset = () => {
     setIsRunning(false);
     setTime(0);
+    setLaps([]);
+    playSound();
   };
 
   const formatTime = (milliseconds) => {
@@ -52,6 +82,11 @@ const Stopwatch = () => {
       seconds: String(seconds).padStart(2, '0'),
       milliseconds: String(ms).padStart(2, '0'),
     };
+  };
+
+  const formatLapTime = (milliseconds) => {
+    const time = formatTime(milliseconds);
+    return `${time.hours}:${time.minutes}:${time.seconds}.${time.milliseconds}`;
   };
 
   const timeDisplay = formatTime(time);
@@ -102,6 +137,16 @@ const Stopwatch = () => {
           </Button>
         )}
         <Button
+          onClick={handleLap}
+          size="lg"
+          variant="outline"
+          className="control-btn lap-btn"
+          disabled={!isRunning || time === 0}
+        >
+          <Flag size={20} />
+          Lap
+        </Button>
+        <Button
           onClick={handleReset}
           size="lg"
           variant="outline"
@@ -111,6 +156,20 @@ const Stopwatch = () => {
           Reset
         </Button>
       </div>
+
+      {laps.length > 0 && (
+        <div className="laps-container">
+          <h3 className="laps-title">Laps</h3>
+          <div className="laps-list">
+            {laps.map((lap) => (
+              <div key={lap.id} className="lap-item">
+                <span className="lap-number">Lap {lap.id}</span>
+                <span className="lap-time">{formatLapTime(lap.time)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
