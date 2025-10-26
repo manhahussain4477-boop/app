@@ -37,12 +37,15 @@ const Home = () => {
               </p>
               <CountdownTimer />
             </section>
+
+            {/* AdSense under Countdown Timer */}
+            <div className="ad-section">
+              <AdSense slot="sidebar" />
+            </div>
           </div>
 
-          {/* Sidebar with Ad */}
+          {/* Sidebar with Info */}
           <aside className="sidebar">
-            <AdSense slot="sidebar" />
-            
             <div className="info-card">
               <h3>Why Use Our Timers?</h3>
               <ul>
