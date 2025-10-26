@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import './Stopwatch.css';
@@ -9,7 +9,22 @@ const CountdownTimer = () => {
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const intervalRef = useRef(null);
+  const audioRef = useRef(null);
+  const completeAudioRef = useRef(null);
+
+  useEffect(() => {
+    // Create audio elements for sounds
+    audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZSAKLVLS');
+    
+    // Create completion sound (longer beep)
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    completeAudioRef.current = { audioContext, oscillator, gainNode };
+  }, []);
 
   useEffect(() => {
     if (isRunning && time > 0) {
@@ -18,6 +33,7 @@ const CountdownTimer = () => {
           if (prevTime <= 10) {
             setIsRunning(false);
             setIsComplete(true);
+            playCompleteSound();
             return 0;
           }
           return prevTime - 10;
@@ -36,6 +52,37 @@ const CountdownTimer = () => {
     };
   }, [isRunning, time]);
 
+  const playSound = () => {
+    if (audioRef.current && soundEnabled) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+    }
+  };
+
+  const playCompleteSound = () => {
+    if (!soundEnabled) return;
+    
+    try {
+      const { audioContext } = completeAudioRef.current;
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 1);
+    } catch (e) {
+      console.log('Audio playback failed:', e);
+    }
+  };
+
   const handleStart = () => {
     if (!isRunning && time === 0 && inputSeconds) {
       const seconds = parseInt(inputSeconds, 10);
@@ -43,15 +90,18 @@ const CountdownTimer = () => {
         setTime(seconds * 1000);
         setIsRunning(true);
         setIsComplete(false);
+        playSound();
       }
     } else if (time > 0) {
       setIsRunning(true);
       setIsComplete(false);
+      playSound();
     }
   };
 
   const handleStop = () => {
     setIsRunning(false);
+    playSound();
   };
 
   const handleReset = () => {
@@ -59,6 +109,7 @@ const CountdownTimer = () => {
     setTime(0);
     setInputSeconds('');
     setIsComplete(false);
+    playSound();
   };
 
   const formatTime = (milliseconds) => {
@@ -94,6 +145,17 @@ const CountdownTimer = () => {
             onChange={(e) => setInputSeconds(e.target.value)}
             className="timer-input"
           />
+          <div className="sound-toggle">
+            <Button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              variant="outline"
+              size="sm"
+              className="sound-btn"
+            >
+              <Volume2 size={16} />
+              Sound: {soundEnabled ? 'ON' : 'OFF'}
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="time-display">
@@ -121,7 +183,7 @@ const CountdownTimer = () => {
 
       {isComplete && (
         <div className="timer-complete">
-          <span className="complete-text">⏰ Time's Up!</span>
+          <span className="complete-text">Time's Up!</span>
         </div>
       )}
 
